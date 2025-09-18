@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ritmo Cardíaco Interactivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.5s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Animación para alta tensión */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        /* Animación para baja tensión */
+        @keyframes pulse-calm {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .shake-animation {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite;
+            transform: translate3d(0, 0, 0);
+        }
+
+        .pulse-calm-animation {
+            animation: pulse-calm 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-[#F1FAEE]">
+    <div id="main-container" class="flex flex-col items-center justify-center p-8 rounded-xl shadow-2xl bg-white bg-opacity-80 backdrop-blur-sm transform transition-all duration-500 ease-in-out">
+        <h1 class="text-4xl sm:text-5xl font-bold text-center mb-6 text-gray-800">
+            Monitor de Pulso
+        </h1>
+        <p class="text-xl text-center mb-8 text-gray-600">
+            Ingresa un pulso y observa cómo cambia el ambiente.
+        </p>
+
+        <div class="flex flex-col items-center gap-4 mb-8">
+            <label for="bpm-input" class="text-lg font-medium text-gray-700">Pulso (BPM)</label>
+            <input type="number" id="bpm-input" value="70" class="w-full sm:w-64 p-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center text-xl" />
+        </div>
+        
+        <p id="bpm-display" class="text-6xl sm:text-7xl font-bold text-gray-900 mb-4 transition-all duration-500 ease-in-out">
+            70 BPM
+        </p>
+
+        <p id="status-message" class="text-xl font-medium text-center text-gray-700 transition-opacity duration-300 ease-in-out">
+            Relajado
+        </p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const bpmInput = document.getElementById('bpm-input');
+            const bpmDisplay = document.getElementById('bpm-display');
+            const statusMessage = document.getElementById('status-message');
+            const body = document.body;
+            const mainContainer = document.getElementById('main-container');
+
+            // Colores base en formato hexadecimal para CSS
+            const colors = {
+                calmaProfunda: '#A8DADC', // 168, 218, 220
+                relajado: '#BFD8B8',      // 191, 216, 184
+                neutro: '#F1FAEE',        // 241, 250, 238
+                tensionLeve: '#F4A261',   // 244, 162, 97
+                ansiedad: '#E76F51',      // 231, 111, 81
+                panico: '#D62828'         // 214, 40, 40
+            };
+
+            function getColor(bpm) {
+                if (bpm <= 65) return colors.calmaProfunda;
+                if (bpm <= 75) return colors.relajado;
+                if (bpm <= 85) return colors.neutro;
+                if (bpm <= 95) return colors.tensionLeve;
+                if (bpm <= 110) return colors.ansiedad;
+                return colors.panico;
+            }
+
+            function getStatus(bpm) {
+                if (bpm <= 65) return 'Calma Profunda';
+                if (bpm <= 75) return 'Relajado';
+                if (bpm <= 85) return 'Estable';
+                if (bpm <= 95) return 'Tensión Leve';
+                if (bpm <= 110) return 'Ansiedad';
+                return 'Pánico';
+            }
+
+            function updateUI() {
+                let bpm = parseInt(bpmInput.value);
+                if (isNaN(bpm) || bpm < 0) {
+                    bpm = 0;
+                    bpmInput.value = 0;
+                }
+
+                const newColor = getColor(bpm);
+                const newStatus = getStatus(bpm);
+
+                // Actualizar la interfaz
+                bpmDisplay.textContent = `${bpm} BPM`;
+                statusMessage.textContent = newStatus;
+                body.style.backgroundColor = newColor;
+
+                // Controlar las animaciones según el BPM
+                if (bpm > 85) {
+                    mainContainer.classList.remove('pulse-calm-animation');
+                    mainContainer.classList.add('shake-animation');
+                } else {
+                    mainContainer.classList.remove('shake-animation');
+                    mainContainer.classList.add('pulse-calm-animation');
+                }
+            }
+            
+            // Iniciar la UI con el valor por defecto
+            updateUI();
+
+            // Escuchar cambios en el input
+            bpmInput.addEventListener('input', () => {
+                updateUI();
+            });
+        });
+    </script>
+</body>
+</html>
